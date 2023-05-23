@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wordpress-deployment
+  namespace: mini-projet
+  labels:
+    app: wordpress
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: wordpress
+  template:
+    metadata:
+      name: wordpress-replicaset
+      labels:
+        app: wordpress
+    spec:
+      containers:
+        - name: wordpress
+          image: wordpress
+          env:
+            - name: WORDPRESS_DB_HOST
+              value: clusterip-service:3306
+            - name: WORDPRESS_DB_NAME
+              value: eazytraining
+            - name: WORDPRESS_DB_USER
+              value: eazy
+            - name: WORDPRESS_DB_PASSWORD
+              value: eazy
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - mountPath: /var/www/html
+              name: wordpress-data-volume
+          ports:
+            - containerPort: 80
+      volumes:
+        - name: wordpress-data-volume
+          hostPath:
+            path: /data
+      
